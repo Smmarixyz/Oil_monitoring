@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <title>Flask App</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!-- Highcharts -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+</head>
+<body>
+    <div class="jumbotron">
+        <h1 class="text-center text-white">Welcome to Real time Actual vs. Prediction Temperature Visualization</h1>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div id="combined-chart"></div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var combinedChart = Highcharts.chart('combined-chart', {
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: 'Temperature and Prediction'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    dateTimeLabelFormats: {
+                        millisecond: '%H:%M:%S.%L'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Value'
+                    }
+                },
+                series: [{
+                    name: 'Temperature',
+                    data: []
+                }, {
+                    name: 'Prediction',
+                    data: []
+                }]
+            });
+
+            function getCurrentDateTime() {
+                return new Date(); // Get current date and time
+            }
+
+            function requestData() {
+                fetch('/Predictiondata')
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        var xAxisData = data.xs.slice(-10).map(function(timestamp) {
+                            return new Date(timestamp); // Convert timestamp to milliseconds
+                        });
+
+                        combinedChart.xAxis[0].setCategories(xAxisData);
+
+                        combinedChart.series[0].setData(data.combined_data.slice(-10));
+                        combinedChart.series[1].setData(data.rescaled_prediction.slice(-10));
+
+
+                    });
+            }
+
+            setInterval(requestData, 1000);
+        });
+    </script>
+<script>
+    class Image{
+
+        constructor(imgUrl, size)
+        {
+            this.imgUrl=imgUrl;
+            this.size=size;
+        }
+
+        backgroundImage()
+        {
+            console.log("inside function ")
+            // Select the Image
+            var img = document.querySelector(".jumbotron");
+
+            // create Css Text
+            var text = "margin:auto;"+
+                "background-image: url("+this.imgUrl+");" +
+                "background-size:cover;"+
+                "opacity:1;"+
+                "background-blend-mode: darken;"+
+                "height: "+ this.size + "vh;";
+
+            img.style.cssText =  text;
+        }
+
+        centerTitle()
+        {
+            /*
+                Center the Title
+             */
+            var t1 = document.querySelector("#title");
+            t1.classList.add("text-white");
+            t1.classList.add("text-center");
+            t1.classList.add("display-3");
+        }
+    }
+    const imgUrl = 'static/css/images/85pT.gif'
+    const size = "30";
+    var obj = new Image(imgUrl, size);
+    obj.backgroundImage();
+    obj.centerTitle();
+ </script>
+</body>
+</html>
